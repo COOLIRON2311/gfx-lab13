@@ -25,28 +25,32 @@ using namespace std;
 
 int VERTICES;
 
-#define red    1.0, 0.0, 0.0, 1.0
-#define green  0.0, 1.0, 0.0, 1.0
-#define blue   0.0, 0.0, 1.0, 1.0
-#define yellow 1.0, 1.0, 0.3, 1.0
-#define orange 1.0, 0.5, 0.0, 1.0
-#define violet 0.5, 0.0, 1.0, 1.0
-#define white  1.0, 1.0, 1.0, 1.0
-#define cyan   0.0, 1.0, 1.0, 1.0
-
 GLuint VBO;
 GLuint Program;
 GLuint texture_sun;
+GLuint texture_mercury;
+GLuint texture_venus;
+GLuint texture_earth;
+GLuint texture_mars;
+GLuint texture_jupiter;
+GLuint texture_saturn;
+GLuint texture_uranus;
+GLuint texture_neptune;
 
-GLint A1_vertex;
-GLint A1_uvs;
-GLint U1_affine;
-GLint U1_proj;
+GLint A_vertex;
+GLint A_uvs;
+GLint U_affine;
+GLint U_proj;
+
+GLint U_offsets;
 
 // Матрицы аффиных преобразований
 glm::mat4 affine;
 // Матрица проекции
 glm::mat4 proj;
+
+vector<glm::vec2> offsets;
+
 
 struct Vertex
 {
@@ -156,8 +160,11 @@ in vec2 uv;
 out vec2 texcoord;
 uniform mat4 affine;
 uniform mat4 proj;
+uniform vec2 offsets[9];
 void main() {
-    gl_Position = proj * affine * vec4(coord / 2, 1.0);
+	float offset = offsets[gl_InstanceID].x;
+    float scale = offsets[gl_InstanceID].y;
+    gl_Position = proj * affine * (vec4(coord * scale, 1.0) + vec4(offset, 0.0, 0.0, 0.0));
 	texcoord = uv;
 })";
 
@@ -165,6 +172,7 @@ const char* FragShaderSource = R"(
 #version 330 core
 in vec2 texcoord;
 uniform sampler2D tex;
+
 void main() {
-    gl_FragColor = texture(tex, texcoord);
+	gl_FragColor = texture(tex, texcoord);
 })";

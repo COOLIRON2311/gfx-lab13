@@ -4,6 +4,17 @@ void Init()
 {
 	proj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
 	affine = glm::mat4(1.0f);
+	offsets = {
+		{0, 1.0},
+		{1.2, 0.003504},
+		{2, 0.008691},
+		{3, 0.009149},
+		{4, 0.004868},
+		{5, 0.100398},
+		{6, 0.083626},
+		{7, 0.036422},
+		{8, 0.035359} 
+	};
 	//Включаем проверку глубины
 	glEnable(GL_DEPTH_TEST);
 	// Инициализируем шейдеры
@@ -119,6 +130,14 @@ void InitVBO()
 void InitTextures()
 {
 	LoadTexture(GL_TEXTURE0, texture_sun, "textures/sun_map.jpg");
+	LoadTexture(GL_TEXTURE1, texture_mercury, "textures/mercury_map.jpg");
+	LoadTexture(GL_TEXTURE2, texture_venus, "textures/venus_map.jpg");
+	LoadTexture(GL_TEXTURE3, texture_earth, "textures/earth_map.jpg");
+	LoadTexture(GL_TEXTURE4, texture_mars, "textures/mars_map.jpg");
+	LoadTexture(GL_TEXTURE5, texture_jupiter, "textures/jupiter_map.jpg");
+	LoadTexture(GL_TEXTURE6, texture_saturn, "textures/saturn_map.jpg");
+	LoadTexture(GL_TEXTURE7, texture_uranus, "textures/uranus_map.jpg");
+	LoadTexture(GL_TEXTURE8, texture_neptune, "textures/neptune_map.jpg");
 }
 
 void LoadAttrib(GLuint prog, GLint& attrib, const char* attr_name)
@@ -198,10 +217,11 @@ void InitShader()
 		return;
 	}
 
-	LoadAttrib(Program, A1_vertex, "coord");
-	LoadAttrib(Program, A1_uvs, "uv");
-	LoadUniform(Program, U1_affine, "affine");
-	LoadUniform(Program, U1_proj, "proj");
+	LoadAttrib(Program, A_vertex, "coord");
+	LoadAttrib(Program, A_uvs, "uv");
+	LoadUniform(Program, U_affine, "affine");
+	LoadUniform(Program, U_proj, "proj");
+	LoadUniform(Program, U_offsets, "offsets");
 	checkOpenGLerror();
 }
 
@@ -209,17 +229,28 @@ void Draw(sf::Window& window)
 {
 	window.setTitle("Solar System in OpenGL");
 	glUseProgram(Program);
-	glUniformMatrix4fv(U1_affine, 1, GL_FALSE, glm::value_ptr(affine));
-	glUniformMatrix4fv(U1_proj, 1, GL_FALSE, glm::value_ptr(proj));
-	glEnableVertexAttribArray(A1_vertex);
-	glEnableVertexAttribArray(A1_uvs);
+	glUniformMatrix4fv(U_affine, 1, GL_FALSE, glm::value_ptr(affine));
+	glUniformMatrix4fv(U_proj, 1, GL_FALSE, glm::value_ptr(proj));
+	glUniform2fv(glGetUniformLocation(Program, "offsets"), 9,
+		glm::value_ptr(offsets[0]));
+	glUniform1i(glGetUniformLocation(Program, "sun"), 0);
+	/*glUniform1i(glGetUniformLocation(Program, "mercury"), 1);
+	glUniform1i(glGetUniformLocation(Program, "venus"), 2);
+	glUniform1i(glGetUniformLocation(Program, "earth"), 3);
+	glUniform1i(glGetUniformLocation(Program, "mars"), 4);
+	glUniform1i(glGetUniformLocation(Program, "jupiter"), 5);
+	glUniform1i(glGetUniformLocation(Program, "saturn"), 6);
+	glUniform1i(glGetUniformLocation(Program, "uranus"), 7);
+	glUniform1i(glGetUniformLocation(Program, "neptune"), 8);*/
+	glEnableVertexAttribArray(A_vertex);
+	glEnableVertexAttribArray(A_uvs);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(A1_vertex, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-	glVertexAttribPointer(A1_uvs, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(A_vertex, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(A_uvs, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDrawArrays(GL_TRIANGLES, 0, VERTICES);
-	glDisableVertexAttribArray(A1_vertex);
-	glDisableVertexAttribArray(A1_uvs);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, VERTICES, 9);
+	glDisableVertexAttribArray(A_vertex);
+	glDisableVertexAttribArray(A_uvs);
 	glUseProgram(0); // Отключаем шейдерную программу
 	checkOpenGLerror(); // Проверяем на ошибки
 }
