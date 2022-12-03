@@ -36,6 +36,7 @@ GLuint texture_jupiter;
 GLuint texture_saturn;
 GLuint texture_uranus;
 GLuint texture_neptune;
+GLuint texture_pluto;
 
 GLint A_vertex;
 GLint A_uvs;
@@ -164,7 +165,7 @@ out vec2 texcoord;
 flat out int index;
 uniform mat4 affine;
 uniform mat4 proj;
-uniform vec4 offsets[9];
+uniform vec4 offsets[10];
 
 mat4 rotateX( in float angle ) {
 	return mat4(	1.0,		0,			0,			0,
@@ -212,6 +213,7 @@ uniform sampler2D jupiter;
 uniform sampler2D saturn;
 uniform sampler2D uranus;
 uniform sampler2D neptune;
+uniform sampler2D pluto;
 
 void main() {
 	switch (index)
@@ -242,6 +244,9 @@ void main() {
 			break;
 		case 8:
 			gl_FragColor = texture(neptune, texcoord);
+			break;
+		case 9:
+			gl_FragColor = texture(pluto, texcoord);
 			break;
 	}
 })";

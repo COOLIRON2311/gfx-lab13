@@ -5,10 +5,10 @@ void Init()
 	proj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
 	affine = glm::mat4(1.0f);
 	speeds_sun = {
-		0.00, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009,
+		0.00, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010,
 	};
 	speeds_axis = {
-		0.01, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18,
+		0.01, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.002,
 	};
 	offsets = {
 		{0, 1.0, 0, 0}, // sun
@@ -19,7 +19,8 @@ void Init()
 		{7, 0.100398, 0, 0}, // jupyter
 		{8, 0.083626, 0, 0}, // saturn
 		{9, 0.036422, 0, 0}, // uranus
-		{10, 0.035359, 0, 0} // neptune
+		{10, 0.035359, 0, 0}, // neptune
+		{11, 0.017, 0, 0}	// pluto
 	};
 	//Включаем проверку глубины
 	glEnable(GL_DEPTH_TEST);
@@ -154,6 +155,7 @@ void InitTextures()
 	LoadTexture(GL_TEXTURE6, texture_saturn, "textures/saturn_map.jpg");
 	LoadTexture(GL_TEXTURE7, texture_uranus, "textures/uranus_map.jpg");
 	LoadTexture(GL_TEXTURE8, texture_neptune, "textures/neptune_map.jpg");
+	LoadTexture(GL_TEXTURE9, texture_pluto, "textures/pluto_map.jpg");
 }
 
 void LoadAttrib(GLuint prog, GLint& attrib, const char* attr_name)
@@ -249,6 +251,7 @@ void InitShader()
 	glUniform1i(glGetUniformLocation(Program, "saturn"), 6);
 	glUniform1i(glGetUniformLocation(Program, "uranus"), 7);
 	glUniform1i(glGetUniformLocation(Program, "neptune"), 8);
+	glUniform1i(glGetUniformLocation(Program, "pluto"), 9);
 	glUseProgram(0);
 }
 
@@ -258,7 +261,7 @@ void Draw(sf::Window& window)
 	glUseProgram(Program);
 	glUniformMatrix4fv(U_affine, 1, GL_FALSE, glm::value_ptr(affine));
 	glUniformMatrix4fv(U_proj, 1, GL_FALSE, glm::value_ptr(proj));
-	glUniform4fv(glGetUniformLocation(Program, "offsets"), 9,
+	glUniform4fv(glGetUniformLocation(Program, "offsets"), 10,
 		glm::value_ptr(offsets[0]));
 	glEnableVertexAttribArray(A_vertex);
 	glEnableVertexAttribArray(A_uvs);
@@ -266,7 +269,7 @@ void Draw(sf::Window& window)
 	glVertexAttribPointer(A_vertex, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
 	glVertexAttribPointer(A_uvs, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDrawArraysInstanced(GL_TRIANGLES, 0, VERTICES, 9);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, VERTICES, 10);
 	glDisableVertexAttribArray(A_vertex);
 	glDisableVertexAttribArray(A_uvs);
 	glUseProgram(0); // Отключаем шейдерную программу
