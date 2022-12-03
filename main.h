@@ -49,7 +49,10 @@ glm::mat4 affine;
 // Матрица проекции
 glm::mat4 proj;
 
-vector<glm::vec2> offsets;
+vector<glm::vec4> offsets;
+
+vector<float> speeds_sun;
+vector<float> speeds_axis;
 
 
 struct Vertex
@@ -161,11 +164,36 @@ out vec2 texcoord;
 flat out int index;
 uniform mat4 affine;
 uniform mat4 proj;
-uniform vec2 offsets[9];
+uniform vec4 offsets[9];
+
+mat4 rotateX( in float angle ) {
+	return mat4(	1.0,		0,			0,			0,
+			 		0, 	cos(angle),	-sin(angle),		0,
+					0, 	sin(angle),	 cos(angle),		0,
+					0, 			0,			  0, 		1);
+}
+
+mat4 rotateY( in float angle ) {
+	return mat4(	cos(angle),		0,		sin(angle),	0,
+			 				0,		1.0,			 0,	0,
+					-sin(angle),	0,		cos(angle),	0,
+							0, 		0,				0,	1);
+}
+
+mat4 rotateZ( in float angle ) {
+	return mat4(	cos(angle),		-sin(angle),	0,	0,
+			 		sin(angle),		cos(angle),		0,	0,
+							0,				0,		1,	0,
+							0,				0,		0,	1);
+}
+
 void main() {
 	float offset = offsets[gl_InstanceID].x;
     float scale = offsets[gl_InstanceID].y;
-    gl_Position = proj * affine * (vec4(coord * scale * 2, 1.0) + vec4(offset, 0.0, 0.0, 0.0));
+	float rot_axis = offsets[gl_InstanceID].z;
+	float rot_sun = offsets[gl_InstanceID].w;
+	vec4 position = rotateY(rot_axis) * vec4(coord * scale * 2, 1.0);
+    gl_Position = proj * affine * (rotateY(rot_sun) * (position + vec4(offset, 0.0, 0.0, 0.0)));
 	texcoord = uv;
 	index = gl_InstanceID;
 })";

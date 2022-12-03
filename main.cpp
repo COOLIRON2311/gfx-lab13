@@ -4,16 +4,22 @@ void Init()
 {
 	proj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
 	affine = glm::mat4(1.0f);
+	speeds_sun = {
+		0.00, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09,
+	};
+	speeds_axis = {
+		0.01, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18,
+	};
 	offsets = {
-		{0, 1.0},
-		{3, 0.003504},
-		{4, 0.008691},
-		{5, 0.009149},
-		{6, 0.004868},
-		{7, 0.100398},
-		{8, 0.083626},
-		{9, 0.036422},
-		{10, 0.035359} 
+		{0, 1.0, 0, 0}, // sun
+		{3, 0.003504, 0, 0}, // mercury
+		{4, 0.008691, 0, 0}, // venus
+		{5, 0.009149, 0, 0}, // earth 
+		{6, 0.004868, 0, 0}, // mars
+		{7, 0.100398, 0, 0}, // jupyter
+		{8, 0.083626, 0, 0}, // saturn
+		{9, 0.036422, 0, 0}, // uranus
+		{10, 0.035359, 0, 0} // neptune
 	};
 	//Включаем проверку глубины
 	glEnable(GL_DEPTH_TEST);
@@ -22,6 +28,15 @@ void Init()
 	// Инициализируем вершинный буфер
 	InitVBO();
 	InitTextures();
+}
+
+void Rotate()
+{
+	for (int i = 0; i < offsets.size(); i++)
+	{
+		offsets[i].z = fmod(offsets[i].z + speeds_axis[i], 2 * M_PI);
+		offsets[i].w = fmod(offsets[i].w + speeds_sun[i], 2 * M_PI);
+	}
 }
 
 int main()
@@ -107,6 +122,7 @@ int main()
 			
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Очищаем буфер цвета и буфер глубины
+		Rotate();
 		Draw(window); // Рисуем
 		window.display(); // Выводим на экран
 	}
@@ -224,8 +240,6 @@ void InitShader()
 	LoadUniform(Program, U_offsets, "offsets");
 	checkOpenGLerror();
 	glUseProgram(Program);
-	glUniform2fv(glGetUniformLocation(Program, "offsets"), 9,
-		glm::value_ptr(offsets[0]));
 	glUniform1i(glGetUniformLocation(Program, "sun"), 0);
 	glUniform1i(glGetUniformLocation(Program, "mercury"), 1);
 	glUniform1i(glGetUniformLocation(Program, "venus"), 2);
@@ -244,6 +258,8 @@ void Draw(sf::Window& window)
 	glUseProgram(Program);
 	glUniformMatrix4fv(U_affine, 1, GL_FALSE, glm::value_ptr(affine));
 	glUniformMatrix4fv(U_proj, 1, GL_FALSE, glm::value_ptr(proj));
+	glUniform4fv(glGetUniformLocation(Program, "offsets"), 9,
+		glm::value_ptr(offsets[0]));
 	glEnableVertexAttribArray(A_vertex);
 	glEnableVertexAttribArray(A_uvs);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -285,6 +301,7 @@ void ShaderLog(unsigned int shader)
 		std::vector<char> infoLog(infologLen);
 		glGetShaderInfoLog(shader, infologLen, &charsWritten, infoLog.data());
 		std::cout << "InfoLog: " << infoLog.data() << std::endl;
+		exit(1);
 	}
 }
 
