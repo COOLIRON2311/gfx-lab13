@@ -192,8 +192,9 @@ void main() {
     float scale = offsets[gl_InstanceID].y;
 	float rot_axis = offsets[gl_InstanceID].z;
 	float rot_sun = offsets[gl_InstanceID].w;
-	vec4 position = rotateY(rot_axis) * vec4(coord * scale * 2, 1.0);
-    gl_Position = proj * affine * (rotateY(rot_sun) * (position + vec4(offset, 0.0, 0.0, 0.0)));
+	vec4 pos = rotateY(rot_axis) * vec4(coord * scale * 2, 1.0);
+    pos = rotateY(rot_sun) * (pos + vec4(offset, 0.0, 0.0, 0.0));
+    gl_Position = proj * affine * pos;
 	texcoord = uv;
 	index = gl_InstanceID;
 })";
