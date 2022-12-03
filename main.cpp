@@ -10,7 +10,7 @@ void Init()
 	InitShader();
 	// Инициализируем вершинный буфер
 	InitVBO();
-	// InitTextures();
+	InitTextures();
 }
 
 int main()
@@ -107,64 +107,18 @@ EXIT_IS_RIGHT_HERE: // Метка выхода
 void InitVBO()
 {
 	glGenBuffers(1, &VBO); // Генерируем вершинный буфер
-	// Read our .obj file
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
-	loadOBJ("test.obj", vertices, uvs, normals);
-	sz = vertices.size();
 	vector<Vertex> data;
-	for (int i = 0; i < sz; i++)
-	{
-		Vertex v = { vertices[i][0], vertices[i][1], vertices[i][2], white, uvs[i][0], uvs[i][1]};
-		data.push_back(v);
-	}
+	load_obj("sphere.obj", data);
+	VERTICES = data.size();
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Привязываем вершинный буфер
-	glBufferData(GL_ARRAY_BUFFER, sz * sizeof(Vertex), data.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, VERTICES * sizeof(Vertex), data.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // Отвязываем вершинный буфер
 	checkOpenGLerror();
 }
 
 void InitTextures()
 {
-	glGenTextures(1, &texture1); // Генерируем текстуру
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture1); // Привязываем текстуру
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Устанавливаем параметры текстуры
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	int width, height, channels; // Загружаем текстуру
-	unsigned char* data = stbi_load("metallica.jpg", &width, &height, &channels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data); // Освобождаем память
-
-	glGenTextures(1, &texture2); // Генерируем текстуру
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture2); // Привязываем текстуру
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Устанавливаем параметры текстуры
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	data = stbi_load("wall.jpg", &width, &height, &channels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data); // Освобождаем память
+	LoadTexture(GL_TEXTURE0, texture_sun, "textures/sun_map.jpg");
 }
 
 void LoadAttrib(GLuint prog, GLint& attrib, const char* attr_name)
@@ -185,6 +139,29 @@ void LoadUniform(GLuint prog, GLint& attrib, const char* attr_name)
 		std::cout << "could not bind uniform " << attr_name << std::endl;
 		return;
 	}
+}
+
+void LoadTexture(GLenum tex_enum, GLuint& tex, const char* path)
+{
+	glGenTextures(1, &tex); // Генерируем текстуру
+	glActiveTexture(tex_enum);
+	glBindTexture(GL_TEXTURE_2D, tex); // Привязываем текстуру
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Устанавливаем параметры текстуры
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	int width, height, channels; // Загружаем текстуру
+	unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture " << path << std::endl;
+	}
+	stbi_image_free(data); // Освобождаем память
 }
 
 void InitShader()
@@ -222,7 +199,7 @@ void InitShader()
 	}
 
 	LoadAttrib(Program, A1_vertex, "coord");
-	LoadAttrib(Program, A1_color, "color");
+	LoadAttrib(Program, A1_uvs, "uv");
 	LoadUniform(Program, U1_affine, "affine");
 	LoadUniform(Program, U1_proj, "proj");
 	checkOpenGLerror();
@@ -235,14 +212,14 @@ void Draw(sf::Window& window)
 	glUniformMatrix4fv(U1_affine, 1, GL_FALSE, glm::value_ptr(affine));
 	glUniformMatrix4fv(U1_proj, 1, GL_FALSE, glm::value_ptr(proj));
 	glEnableVertexAttribArray(A1_vertex);
-	glEnableVertexAttribArray(A1_color);
+	glEnableVertexAttribArray(A1_uvs);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(A1_vertex, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)0);
-	glVertexAttribPointer(A1_color, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(A1_vertex, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(A1_uvs, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDrawArrays(GL_TRIANGLES, 0, sz);
+	glDrawArrays(GL_TRIANGLES, 0, VERTICES);
 	glDisableVertexAttribArray(A1_vertex);
-	glDisableVertexAttribArray(A1_color);
+	glDisableVertexAttribArray(A1_uvs);
 	glUseProgram(0); // Отключаем шейдерную программу
 	checkOpenGLerror(); // Проверяем на ошибки
 }
