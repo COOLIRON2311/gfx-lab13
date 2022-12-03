@@ -131,7 +131,8 @@ void InitVBO()
 	glGenBuffers(1, &VBO); // Генерируем вершинный буфер
 	vector<Vertex> data;
 	load_obj("sphere.obj", data);
-	VERTICES = data.size();
+	 VERTICES = data.size();
+	//cout << VERTICES << endl;
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Привязываем вершинный буфер
 	glBufferData(GL_ARRAY_BUFFER, VERTICES * sizeof(Vertex), data.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // Отвязываем вершинный буфер
