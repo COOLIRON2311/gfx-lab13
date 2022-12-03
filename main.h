@@ -158,6 +158,7 @@ const char* VertexShaderSource = R"(
 in vec3 coord;
 in vec2 uv;
 out vec2 texcoord;
+flat out int index;
 uniform mat4 affine;
 uniform mat4 proj;
 uniform vec2 offsets[9];
@@ -166,13 +167,52 @@ void main() {
     float scale = offsets[gl_InstanceID].y;
     gl_Position = proj * affine * (vec4(coord * scale, 1.0) + vec4(offset, 0.0, 0.0, 0.0));
 	texcoord = uv;
+	index = gl_InstanceID;
 })";
 
 const char* FragShaderSource = R"(
 #version 330 core
 in vec2 texcoord;
-uniform sampler2D tex;
+flat in int index;
+uniform sampler2D sun;
+uniform sampler2D mercury;
+uniform sampler2D venus;
+uniform sampler2D earth;
+uniform sampler2D mars;
+uniform sampler2D jupiter;
+uniform sampler2D saturn;
+uniform sampler2D uranus;
+uniform sampler2D neptune;
 
 void main() {
-	gl_FragColor = texture(tex, texcoord);
+	switch (index)
+	{
+		case 0:
+			gl_FragColor = texture(sun, texcoord);
+			break;
+		case 1:
+			gl_FragColor = texture(mercury, texcoord);
+			break;
+		case 2:
+			gl_FragColor = texture(venus, texcoord);
+			break;
+		case 3:
+			gl_FragColor = texture(earth, texcoord);
+			break;
+		case 4:
+			gl_FragColor = texture(mars, texcoord);
+			break;
+		case 5:
+			gl_FragColor = texture(jupiter, texcoord);
+			break;
+		case 6:
+			gl_FragColor = texture(saturn, texcoord);
+			break;
+		case 7:
+			gl_FragColor = texture(uranus, texcoord);
+			break;
+		case 8:
+			gl_FragColor = texture(neptune, texcoord);
+			break;
+	}
 })";

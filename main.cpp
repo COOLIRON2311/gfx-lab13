@@ -223,6 +223,19 @@ void InitShader()
 	LoadUniform(Program, U_proj, "proj");
 	LoadUniform(Program, U_offsets, "offsets");
 	checkOpenGLerror();
+	glUseProgram(Program);
+	glUniform2fv(glGetUniformLocation(Program, "offsets"), 9,
+		glm::value_ptr(offsets[0]));
+	glUniform1i(glGetUniformLocation(Program, "sun"), 0);
+	glUniform1i(glGetUniformLocation(Program, "mercury"), 1);
+	glUniform1i(glGetUniformLocation(Program, "venus"), 2);
+	glUniform1i(glGetUniformLocation(Program, "earth"), 3);
+	glUniform1i(glGetUniformLocation(Program, "mars"), 4);
+	glUniform1i(glGetUniformLocation(Program, "jupiter"), 5);
+	glUniform1i(glGetUniformLocation(Program, "saturn"), 6);
+	glUniform1i(glGetUniformLocation(Program, "uranus"), 7);
+	glUniform1i(glGetUniformLocation(Program, "neptune"), 8);
+	glUseProgram(0);
 }
 
 void Draw(sf::Window& window)
@@ -231,17 +244,6 @@ void Draw(sf::Window& window)
 	glUseProgram(Program);
 	glUniformMatrix4fv(U_affine, 1, GL_FALSE, glm::value_ptr(affine));
 	glUniformMatrix4fv(U_proj, 1, GL_FALSE, glm::value_ptr(proj));
-	glUniform2fv(glGetUniformLocation(Program, "offsets"), 9,
-		glm::value_ptr(offsets[0]));
-	glUniform1i(glGetUniformLocation(Program, "sun"), 0);
-	/*glUniform1i(glGetUniformLocation(Program, "mercury"), 1);
-	glUniform1i(glGetUniformLocation(Program, "venus"), 2);
-	glUniform1i(glGetUniformLocation(Program, "earth"), 3);
-	glUniform1i(glGetUniformLocation(Program, "mars"), 4);
-	glUniform1i(glGetUniformLocation(Program, "jupiter"), 5);
-	glUniform1i(glGetUniformLocation(Program, "saturn"), 6);
-	glUniform1i(glGetUniformLocation(Program, "uranus"), 7);
-	glUniform1i(glGetUniformLocation(Program, "neptune"), 8);*/
 	glEnableVertexAttribArray(A_vertex);
 	glEnableVertexAttribArray(A_uvs);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
