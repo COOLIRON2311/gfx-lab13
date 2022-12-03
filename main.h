@@ -20,6 +20,7 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include "camera.h"
 
 using namespace std;
 
@@ -40,16 +41,11 @@ GLuint texture_pluto;
 
 GLint A_vertex;
 GLint A_uvs;
-GLint U_affine;
-GLint U_proj;
+GLint U_mvp;
 
 GLint U_offsets;
 
-// Матрицы аффиных преобразований
-glm::mat4 affine;
-// Матрица проекции
-glm::mat4 proj;
-
+Camera cam;
 vector<glm::vec4> offsets;
 
 vector<float> speeds_sun;
@@ -163,8 +159,7 @@ in vec3 coord;
 in vec2 uv;
 out vec2 texcoord;
 flat out int index;
-uniform mat4 affine;
-uniform mat4 proj;
+uniform mat4 mvp;
 uniform vec4 offsets[10];
 
 mat4 rotateX( in float angle ) {
@@ -195,7 +190,7 @@ void main() {
 	float rot_sun = offsets[gl_InstanceID].w;
 	vec4 pos = rotateY(rot_axis) * vec4(coord * scale * 2, 1.0);
     pos = rotateY(rot_sun) * (pos + vec4(offset, 0.0, 0.0, 0.0));
-    gl_Position = proj * affine * pos;
+    gl_Position = mvp * pos;
 	texcoord = uv;
 	index = gl_InstanceID;
 })";

@@ -2,8 +2,6 @@
 
 void Init()
 {
-	proj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
-	affine = glm::mat4(1.0f);
 	speeds_sun = {
 		0.00, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010,
 	};
@@ -66,58 +64,54 @@ int main()
 			else if (event.type == sf::Event::KeyPressed) // Если пользователь нажал клавишу
 			{
 				// Rotation
-				if (event.key.code == sf::Keyboard::P)
+				if (event.key.code == sf::Keyboard::Up)
 				{
-					affine = glm::rotate(affine, 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
+					cam.PitchPlus();
 				}
-				else if (event.key.code == sf::Keyboard::R)
+				else if (event.key.code == sf::Keyboard::Down)
 				{
-					affine = glm::rotate(affine, 0.1f, glm::vec3(0.0f, 1.0f, 0.0f));
+					cam.PitchMinus();
 				}
-				else if (event.key.code == sf::Keyboard::Y)
+				else if (event.key.code == sf::Keyboard::Right)
 				{
-					affine = glm::rotate(affine, 0.1f, glm::vec3(0.0f, 0.0f, 1.0f));
+					cam.YawPlus();
+				}
+				else if (event.key.code == sf::Keyboard::Left)
+				{
+					cam.YawMinus();
 				}
 
 				// Movement
 				else if (event.key.code == sf::Keyboard::W)
 				{
-					affine = glm::translate(affine, glm::vec3(0.0f, 0.0f, 0.1f));
+					cam.W();
 				}
 				else if (event.key.code == sf::Keyboard::S)
 				{
-					affine = glm::translate(affine, glm::vec3(0.0f, 0.0f, -0.1f));
+					cam.S();
 				}
 				else if (event.key.code == sf::Keyboard::A)
 				{
-					affine = glm::translate(affine, glm::vec3(-0.1f, 0.0f, 0.0f));
+					cam.A();
 				}
 				else if (event.key.code == sf::Keyboard::D)
 				{
-					affine = glm::translate(affine, glm::vec3(0.1f, 0.0f, 0.0f));
-				}
-				else if (event.key.code == sf::Keyboard::Z)
-				{
-					affine = glm::translate(affine, glm::vec3(0.0f, 0.1f, 0.0f));
-				}
-				else if (event.key.code == sf::Keyboard::X)
-				{
-					affine = glm::translate(affine, glm::vec3(0.0f, -0.1f, 0.0f));
+					cam.D();
 				}
 
 				else if (event.key.code == sf::Keyboard::F1)
 				{
-					proj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
+					cam.Perspective();
 				}
 
 				else if (event.key.code == sf::Keyboard::F2)
 				{
-					proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
+					cam.Ortho();
 				}
 
 				else if (event.key.code == sf::Keyboard::Escape)
 				{
-					affine = glm::mat4(1.0f);
+					cam.Reset();
 				}
 			}
 			
@@ -237,8 +231,7 @@ void InitShader()
 
 	LoadAttrib(Program, A_vertex, "coord");
 	LoadAttrib(Program, A_uvs, "uv");
-	LoadUniform(Program, U_affine, "affine");
-	LoadUniform(Program, U_proj, "proj");
+	LoadUniform(Program, U_mvp, "mvp");
 	LoadUniform(Program, U_offsets, "offsets");
 	checkOpenGLerror();
 	glUseProgram(Program);
@@ -259,8 +252,7 @@ void Draw(sf::Window& window)
 {
 	window.setTitle("Solar System in OpenGL");
 	glUseProgram(Program);
-	glUniformMatrix4fv(U_affine, 1, GL_FALSE, glm::value_ptr(affine));
-	glUniformMatrix4fv(U_proj, 1, GL_FALSE, glm::value_ptr(proj));
+	glUniformMatrix4fv(U_mvp, 1, GL_FALSE, glm::value_ptr(cam.MVP()));
 	glUniform4fv(glGetUniformLocation(Program, "offsets"), 10,
 		glm::value_ptr(offsets[0]));
 	glEnableVertexAttribArray(A_vertex);
