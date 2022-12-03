@@ -6,14 +6,14 @@ void Init()
 	affine = glm::mat4(1.0f);
 	offsets = {
 		{0, 1.0},
-		{1.2, 0.003504},
-		{2, 0.008691},
-		{3, 0.009149},
-		{4, 0.004868},
-		{5, 0.100398},
-		{6, 0.083626},
-		{7, 0.036422},
-		{8, 0.035359} 
+		{3, 0.003504},
+		{4, 0.008691},
+		{5, 0.009149},
+		{6, 0.004868},
+		{7, 0.100398},
+		{8, 0.083626},
+		{9, 0.036422},
+		{10, 0.035359} 
 	};
 	//Включаем проверку глубины
 	glEnable(GL_DEPTH_TEST);
@@ -27,7 +27,7 @@ void Init()
 int main()
 {
 	setlocale(LC_ALL, "Russian");
-	sf::Window window(sf::VideoMode(600, 600), "Shapes", sf::Style::Default, sf::ContextSettings(24));
+	sf::Window window(sf::VideoMode(1000, 1000), "Shapes", sf::Style::Default, sf::ContextSettings(24));
 	SetIcon(window);
 	window.setVerticalSyncEnabled(true); // Вертикальная синхронизация
 	window.setActive(true); // Устанавливаем контекст OpenGL

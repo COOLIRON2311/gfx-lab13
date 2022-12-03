@@ -165,7 +165,7 @@ uniform vec2 offsets[9];
 void main() {
 	float offset = offsets[gl_InstanceID].x;
     float scale = offsets[gl_InstanceID].y;
-    gl_Position = proj * affine * (vec4(coord * scale, 1.0) + vec4(offset, 0.0, 0.0, 0.0));
+    gl_Position = proj * affine * (vec4(coord * scale * 2, 1.0) + vec4(offset, 0.0, 0.0, 0.0));
 	texcoord = uv;
 	index = gl_InstanceID;
 })";
