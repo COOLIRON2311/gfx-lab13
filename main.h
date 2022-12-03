@@ -15,3 +15,156 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <stdio.h>
+#include <string>
+#include <cstring>
+#include <sstream>
+#include <fstream>
+
+using namespace std;
+
+int VERTICES;
+
+#define red    1.0, 0.0, 0.0, 1.0
+#define green  0.0, 1.0, 0.0, 1.0
+#define blue   0.0, 0.0, 1.0, 1.0
+#define yellow 1.0, 1.0, 0.3, 1.0
+#define orange 1.0, 0.5, 0.0, 1.0
+#define violet 0.5, 0.0, 1.0, 1.0
+#define white  1.0, 1.0, 1.0, 1.0
+#define cyan   0.0, 1.0, 1.0, 1.0
+
+GLuint VBO;
+GLuint Program;
+GLuint texture_sun;
+
+GLint A1_vertex;
+GLint A1_uvs;
+GLint U1_affine;
+GLint U1_proj;
+
+// Матрицы аффиных преобразований
+glm::mat4 affine;
+// Матрица проекции
+glm::mat4 proj;
+
+struct Vertex
+{
+	//coords
+	GLfloat x;
+	GLfloat y;
+	GLfloat z;
+
+	// texture coords
+	GLfloat s;
+	GLfloat t;
+};
+
+// Функция для установки иконки приложения
+void SetIcon(sf::Window& wnd);
+// Функция для проверки ошибок
+void checkOpenGLerror();
+
+void ShaderLog(unsigned int shader);
+// Функция для загрузки шейдеров
+void InitShader();
+void LoadAttrib(GLuint prog, GLint& attrib, const char* attr_name);
+void LoadUniform(GLuint prog, GLint& attrib, const char* attr_name);
+void LoadTexture(GLenum tex_enum, GLuint& tex, const char* path);
+// Функция для инициализации вершинного буфера
+void InitVBO();
+// Функция для инициализации ресурсов
+void InitTextures();
+void Init();
+// Функция для отрисовки
+void Draw(sf::Window& window);
+// Функция для очистки шейдеров
+void ReleaseShader();
+// Функция для очистки вершинного буфера
+void ReleaseVBO();
+// Функция для очистки ресурсов
+void Release();
+
+void load_obj(const char* filename, vector<Vertex>& out)
+{
+	vector<glm::vec3> vertices;
+	vector<glm::vec3> normals;
+	vector<glm::vec2> uvs;
+	
+    ifstream in(filename, ios::in);
+    if (!in)
+    {
+        cerr << "Can't open obj " << filename << endl;
+        return;
+    }
+
+    string line;
+    while (getline(in, line))
+    {
+		string s = line.substr(0, 2);
+		if (s == "v ")
+		{
+			istringstream s(line.substr(2));
+			glm::vec3 v;
+			s >> v.x;
+			s >> v.y;
+			s >> v.z;
+			vertices.push_back(v);
+		}
+		else if (s == "vt")
+		{
+			istringstream s(line.substr(3));
+			glm::vec2 uv;
+			s >> uv.x;
+			s >> uv.y;
+			uvs.push_back(uv);
+		}
+		else if (s == "vn")
+		{
+			istringstream s(line.substr(3));
+			glm::vec3 n;
+			s >> n.x;
+			s >> n.y;
+			s >> n.z;
+			normals.push_back(n);
+		}
+		else if (s == "f ")
+		{
+			istringstream s(line.substr(2));
+			string s1, s2, s3;
+			s >> s1;
+			s >> s2;
+			s >> s3;
+			unsigned int v1, v2, v3, uv1, uv2, uv3, n1, n2, n3;
+			sscanf_s(s1.c_str(), "%d/%d/%d", &v1, &uv1, &n1);
+			sscanf_s(s2.c_str(), "%d/%d/%d", &v2, &uv2, &n2);
+			sscanf_s(s3.c_str(), "%d/%d/%d", &v3, &uv3, &n3);
+			Vertex ve1 = { vertices[v1 - 1].x, vertices[v1 - 1].y, vertices[v1 - 1].z, uvs[uv1 - 1].x, uvs[uv1 - 1].y };
+			Vertex ve2 = { vertices[v2 - 1].x, vertices[v2 - 1].y, vertices[v2 - 1].z, uvs[uv2 - 1].x, uvs[uv2 - 1].y };
+			Vertex ve3 = { vertices[v3 - 1].x, vertices[v3 - 1].y, vertices[v3 - 1].z, uvs[uv3 - 1].x, uvs[uv3 - 1].y };
+			out.push_back(ve1);
+			out.push_back(ve2);
+			out.push_back(ve3);
+		}
+	}
+}
+
+const char* VertexShaderSource = R"(
+#version 330 core
+in vec3 coord;
+in vec2 uv;
+out vec2 texcoord;
+uniform mat4 affine;
+uniform mat4 proj;
+void main() {
+    gl_Position = proj * affine * vec4(coord / 2, 1.0);
+	texcoord = uv;
+})";
+
+const char* FragShaderSource = R"(
+#version 330 core
+in vec2 texcoord;
+uniform sampler2D tex;
+void main() {
+    gl_FragColor = texture(tex, texcoord);
+})";
