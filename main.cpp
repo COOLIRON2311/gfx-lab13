@@ -115,6 +115,8 @@ int main()
 				{
 					cam.Reset();
 				}
+				
+				// Pause
 				else if (event.key.code == sf::Keyboard::Space)
 				{
 					paused_sun = !paused_sun;
@@ -131,6 +133,7 @@ int main()
 						};
 					}
 				}
+				
 				else if (event.key.code == sf::Keyboard::RAlt || event.key.code == sf::Keyboard::LAlt)
 				{
 					paused_axis = !paused_axis;
