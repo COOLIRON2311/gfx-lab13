@@ -45,49 +45,8 @@ const char* FragShaderSource = R"(
 #version 330 core
 in vec2 texcoord;
 flat in int index;
-uniform sampler2D sun;
-uniform sampler2D mercury;
-uniform sampler2D venus;
-uniform sampler2D earth;
-uniform sampler2D mars;
-uniform sampler2D jupiter;
-uniform sampler2D saturn;
-uniform sampler2D uranus;
-uniform sampler2D neptune;
-uniform sampler2D pluto;
+uniform sampler2D tex[10];
 
 void main() {
-	switch (index)
-	{
-		case 0:
-			gl_FragColor = texture(sun, texcoord);
-			break;
-		case 1:
-			gl_FragColor = texture(mercury, texcoord);
-			break;
-		case 2:
-			gl_FragColor = texture(venus, texcoord);
-			break;
-		case 3:
-			gl_FragColor = texture(earth, texcoord);
-			break;
-		case 4:
-			gl_FragColor = texture(mars, texcoord);
-			break;
-		case 5:
-			gl_FragColor = texture(jupiter, texcoord);
-			break;
-		case 6:
-			gl_FragColor = texture(saturn, texcoord);
-			break;
-		case 7:
-			gl_FragColor = texture(uranus, texcoord);
-			break;
-		case 8:
-			gl_FragColor = texture(neptune, texcoord);
-			break;
-		case 9:
-			gl_FragColor = texture(pluto, texcoord);
-			break;
-	}
+	gl_FragColor = texture(tex[index], texcoord);
 })";

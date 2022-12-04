@@ -236,16 +236,8 @@ void InitShader()
 	LoadUniform(Program, U_offsets, "offsets");
 	checkOpenGLerror();
 	glUseProgram(Program);
-	glUniform1i(glGetUniformLocation(Program, "sun"), 0);
-	glUniform1i(glGetUniformLocation(Program, "mercury"), 1);
-	glUniform1i(glGetUniformLocation(Program, "venus"), 2);
-	glUniform1i(glGetUniformLocation(Program, "earth"), 3);
-	glUniform1i(glGetUniformLocation(Program, "mars"), 4);
-	glUniform1i(glGetUniformLocation(Program, "jupiter"), 5);
-	glUniform1i(glGetUniformLocation(Program, "saturn"), 6);
-	glUniform1i(glGetUniformLocation(Program, "uranus"), 7);
-	glUniform1i(glGetUniformLocation(Program, "neptune"), 8);
-	glUniform1i(glGetUniformLocation(Program, "pluto"), 9);
+	GLint textures[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	glUniform1iv(glGetUniformLocation(Program, "tex"), 10, textures);
 	glUseProgram(0);
 }
 
