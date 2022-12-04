@@ -47,6 +47,8 @@ int main()
 	window.setActive(true); // Устанавливаем контекст OpenGL
 	glewInit(); // Инициализируем GLEW
 	Init(); // Инициализируем ресурсы
+	bool paused_sun = false;
+	bool paused_axis = false;
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -113,8 +115,40 @@ int main()
 				{
 					cam.Reset();
 				}
+				else if (event.key.code == sf::Keyboard::Space)
+				{
+					paused_sun = !paused_sun;
+					if (paused_sun)
+					{
+						speeds_sun = {
+							0.00, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+						};
+					}
+					else
+					{
+						speeds_sun = {
+							0.00, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010,
+						};
+					}
+				}
+				else if (event.key.code == sf::Keyboard::RAlt || event.key.code == sf::Keyboard::LAlt)
+				{
+					paused_axis = !paused_axis;
+					if (paused_axis)
+					{
+						speeds_axis = {
+							0.00, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+						};
+					}
+					else
+					{
+						speeds_axis = {
+							0.01, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.002,
+						};
+					}
+				}
 			}
-			
+
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Очищаем буфер цвета и буфер глубины
 		Rotate();
@@ -131,7 +165,7 @@ void InitVBO()
 	glGenBuffers(1, &VBO); // Генерируем вершинный буфер
 	vector<Vertex> data;
 	load_obj("sphere.obj", data);
-	 VERTICES = data.size();
+	VERTICES = data.size();
 	//cout << VERTICES << endl;
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Привязываем вершинный буфер
 	glBufferData(GL_ARRAY_BUFFER, VERTICES * sizeof(Vertex), data.data(), GL_STATIC_DRAW);
@@ -209,14 +243,14 @@ void InitShader()
 	glCompileShader(fShader);
 	std::cout << "fragment shader \n";
 	ShaderLog(fShader);
-	
+
 	// Создаем шейдерную программу
 	Program = glCreateProgram();
 
 	// Прикрепляем шейдеры к программе
 	glAttachShader(Program, vShader);
 	glAttachShader(Program, fShader);
-	
+
 	// Линкуем шейдерную программу
 	glLinkProgram(Program);
 
@@ -236,7 +270,7 @@ void InitShader()
 	LoadUniform(Program, U_offsets, "offsets");
 	checkOpenGLerror();
 	glUseProgram(Program);
-	GLint textures[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	GLint textures[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	glUniform1iv(glGetUniformLocation(Program, "tex"), 10, textures);
 	glUseProgram(0);
 }
