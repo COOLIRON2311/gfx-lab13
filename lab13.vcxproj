@@ -132,7 +132,6 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="shaders.h" />
-    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

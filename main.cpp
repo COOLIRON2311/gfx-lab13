@@ -219,18 +219,18 @@ void LoadTexture(GLenum tex_enum, GLuint& tex, const char* path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	int width, height, channels; // Загружаем текстуру
-	unsigned char* data = stbi_load(path, &width, &height, &channels, 0);
-	if (data)
+	sf::Image img;
+	if (!img.loadFromFile(path))
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		std::cout << "could not load texture " << path << std::endl;
+		return;
 	}
-	else
-	{
-		std::cout << "Failed to load texture " << path << std::endl;
-	}
-	stbi_image_free(data); // Освобождаем память
+
+	sf::Vector2u size = img.getSize();
+	int width = size.x;
+	int height = size.y;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.getPixelsPtr());
+	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void InitShader()
